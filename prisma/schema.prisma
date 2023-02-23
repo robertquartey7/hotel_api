@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Here's an example schema of a hotel API:
+
+// Hotel
+
+// id: unique identifier for the hotel
+// name: name of the hotel
+// address: address of the hotel
+// city: city where the hotel is located
+// state: state where the hotel is located
+// country: country where the hotel is located
+// phone: phone number of the hotel
+// email: email address of the hotel
+// website: website URL of the hotel
+// description: description of the hotel
+// star_rating: star rating of the hotel (1-5 stars)
+// amenities: list of amenities offered by the hotel (e.g. pool, spa, gym, restaurant)
+// check_in_time: time when guests can check in
+// check_out_time: time when guests must check out
+// Room
+
+// id: unique identifier for the room
+// hotel_id: identifier for the hotel that the room belongs to
+// room_type: type of room (e.g. single, double, suite)
+// bed_type: type of bed (e.g. king, queen, twin)
+// max_occupancy: maximum number of guests that can occupy the room
+// price_per_night: price of the room per night
+// description: description of the room
+// Reservation
+
+// id: unique identifier for the reservation
+// hotel_id: identifier for the hotel where the reservation is made
+// room_id: identifier for the room that is reserved
+// guest_name: name of the guest who made the reservation
+// start_date: date when the reservation starts
+// end_date: date when the reservation ends
+// num_guests: number of guests for the reservation
+// total_price: total price for the reservation
+// is_paid: indicates whether the reservation has been paid for or not
+// This is just an example schema, and the actual API may have more or fewer fields depending on the requirements of the application.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @unique @default(uuid())
+  email       String       @unique
+  username    String       @unique @db.VarChar(255)
+  password    String       @unique @db.VarChar(255)
+  reservation Reservation?
+}
+
+model Hotel {
+  id          String  @unique @default(uuid())
+  name        String
+  address    String
+  city        String
+  state       String
+  country     String
+  phone       String
+  email       String
+  website     String?
+  description String
+  star_rating Int?
+  amenitites  String[]
+  room        Room[]
+}
+
+model Room {
+  id              String       @unique @default(uuid())
+  hotel_id        String
+  hotel           Hotel        @relation(references: [id], fields: [hotel_id])
+  room_type       String
+  bed_type        String
+  max_occupancy   String
+  price_per_night Int
+  description     String
+  is_reservated   Boolean
+  reservation_id  String?      @unique
+  reservation     Reservation? @relation(fields: [reservation_id], references: [id])
+}
+
+model Reservation {
+  id String @unique @default(uuid())
+
+  user_id          String   @unique
+  user_reservation User     @relation(fields: [user_id], references: [id])
+  guest_name       String   @db.VarChar(255)
+  start_date       DateTime
+  end_date         DateTime
+  num_guests       Int
+  total_price      Int
+  is_paid          Boolean
+  room             Room[]
+}
